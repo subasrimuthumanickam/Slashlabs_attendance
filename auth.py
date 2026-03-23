@@ -31,6 +31,7 @@ def login():
     if request.method == 'POST' and form.validate_on_submit():
         username = request.form.get('username')
         password = request.form.get('password')
+        
         remember = True if request.form.get('remember') else False
         
         user = User.query.filter_by(username=username).first()
@@ -67,6 +68,7 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        department = request.form.get('department')
         full_name = request.form.get('full_name')
         
         # Check if user already exists
@@ -85,6 +87,7 @@ def register():
             username=username, 
             email=email, 
             full_name=full_name,
+            department=department,
             role='employee'
         )
         new_user.set_password(password)

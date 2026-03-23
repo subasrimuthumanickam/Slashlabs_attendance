@@ -9,7 +9,7 @@ import csv
 import io
 
 from app import db
-from models import User, Attendance
+from models import User, Attendance ,Department
 from utils import admin_required
 
 admin_bp = Blueprint('admin', __name__)
@@ -93,12 +93,12 @@ def dashboard():
     
     # Department statistics (only employees with department info)
     department_stats = db.session.query(
-        User.department,
+        Department.name,
         db.func.count(User.id).label('count')
-    ).filter(
-        User.department != None,
+    ).join(User).filter(
+        
         User.role == 'employee'
-    ).group_by(User.department).all()
+    ).group_by(Department.name).all()
     
     dept_labels = [dept[0] for dept in department_stats]  # Department names
     dept_counts = [dept[1] for dept in department_stats]  # User counts in each department
@@ -160,7 +160,9 @@ def add_user():
         password = request.form.get('password')
         full_name = request.form.get('full_name')
         role = request.form.get('role')
-        department = request.form.get('department')
+        department_id = request.form.get('department')
+
+
         position = request.form.get('position')
         
         # Validate username and email
@@ -178,7 +180,7 @@ def add_user():
             email=email,
             full_name=full_name,
             role=role,
-            department=department,
+            department=department_id,
             position=position
         )
         new_user.set_password(password)
@@ -205,7 +207,7 @@ def edit_user(user_id):
         email = request.form.get('email')
         full_name = request.form.get('full_name')
         role = request.form.get('role')
-        department = request.form.get('department')
+        department_id = request.form.get('department')
         position = request.form.get('position')
         password = request.form.get('password')
         
@@ -218,7 +220,7 @@ def edit_user(user_id):
         user.email = email
         user.full_name = full_name
         user.role = role
-        user.department = department
+        user.department = department_id
         user.position = position
         
         if password:
@@ -330,12 +332,11 @@ def reports():
     
     # Department statistics (only employees)
     dept_stats = db.session.query(
-        User.department,
-        db.func.count(User.id).label('user_count')
-    ).filter(
-        User.department != None,
-        User.role == 'employee'
-    ).group_by(User.department).all()
+    Department.name,
+    db.func.count(User.id)
+).join(User).filter(
+    User.role == 'employee'
+).group_by(Department.name).all()
     
     # Attendance statistics by status (only employees)
     status_stats = db.session.query(
@@ -387,13 +388,14 @@ def export_attendance():
         User.id,
         User.username,
         User.full_name,
-        User.department,
+        Department.name,
         Attendance.check_in_time,
         Attendance.check_out_time,
         Attendance.status,
         Attendance.location,
         Attendance.notes
-    ).join(User, Attendance.user_id == User.id)
+    ).join(User, Attendance.user_id == User.id)\
+     .join(Department, User.department == Department.id)
     
     # Apply date filters
     if date_from:
@@ -421,16 +423,16 @@ def export_attendance():
     # Write data
     for row in results:
         writer.writerow([
-            row.id,
-            row.username,
-            row.full_name,
-            row.department,
-            row.check_in_time.strftime('%Y-%m-%d %H:%M:%S') if row.check_in_time else '',
-            row.check_out_time.strftime('%Y-%m-%d %H:%M:%S') if row.check_out_time else '',
-            row.status,
-            row.location,
-            row.notes
-        ])
+        row.id,
+        row.username,
+        row.full_name,
+        row.name,
+        row.check_in_time.strftime('%Y-%m-%d %H:%M:%S') if row.check_in_time else '',
+        row.check_out_time.strftime('%Y-%m-%d %H:%M:%S') if row.check_out_time else '',
+        row.status,
+        row.location,
+        row.notes
+    ])
     
     # Prepare response
     from flask import Response
@@ -443,3 +445,9 @@ def export_attendance():
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename={filename}'}
     )
+@admin_bp.route('/settings')
+@login_required
+@admin_required
+def settings():
+    form = FlaskForm()
+    return render_template('admin/settings.html', form=form)

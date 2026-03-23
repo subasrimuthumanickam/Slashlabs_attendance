@@ -3,6 +3,15 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
+# Table create department
+class Department(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+
+    users = db.relationship('User', backref='department', lazy=True)
+
+    def __repr__(self):
+        return f'<Department {self.name}>'
 
 
 class User(UserMixin, db.Model):
@@ -12,7 +21,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     full_name = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), default='employee')  # 'admin' or 'employee'
-    department = db.Column(db.String(100))
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
     position = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
