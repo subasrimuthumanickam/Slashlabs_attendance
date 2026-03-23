@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if department %}Edit Department{% else %}Add Department{% endif %} - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-building me-2"></i>
+                    {% if department %}Edit Department: {{ department.name }}{% else %}Add New Department{% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() if form }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Department Name*</label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                            {% if department %}value="{{ department.name }}"{% endif %}>
+                        <div class="invalid-feedback">
+                            Please enter a department name.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('admin.departments') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if department %}Update Department{% else %}Create Department{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation script
+(function () {
+    'use strict'
+    
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+    
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}

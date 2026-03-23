@@ -14,6 +14,16 @@ class Department(db.Model):
         return f'<Department {self.name}>'
 
 
+class Position(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), unique=True, nullable=True)
+
+    users = db.relationship('User', backref='position_rel', lazy=True)
+
+    def __repr__(self):
+        return f'<Position {self.title}>'
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
@@ -22,7 +32,7 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), default='employee')  # 'admin' or 'employee'
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
-    position = db.Column(db.String(100))
+    position_id = db.Column(db.Integer, db.ForeignKey('position.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationship with Attendance

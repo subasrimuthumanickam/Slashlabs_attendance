@@ -9,7 +9,7 @@ import csv
 import io
 
 from app import db
-from models import User, Attendance ,Department
+from models import User, Attendance, Department, Position
 from utils import admin_required
 
 admin_bp = Blueprint('admin', __name__)
@@ -161,9 +161,7 @@ def add_user():
         full_name = request.form.get('full_name')
         role = request.form.get('role')
         department_id = request.form.get('department')
-
-
-        position = request.form.get('position')
+        position_id = request.form.get('position')
         
         # Validate username and email
         if User.query.filter_by(username=username).first():
@@ -180,8 +178,8 @@ def add_user():
             email=email,
             full_name=full_name,
             role=role,
-            department=department_id,
-            position=position
+            department_id=department_id if department_id else None,
+            position_id=position_id if position_id else None
         )
         new_user.set_password(password)
         
@@ -191,7 +189,9 @@ def add_user():
         flash('User has been created successfully.', 'success')
         return redirect(url_for('admin.users'))
     
-    return render_template('admin/edit_user.html', user=None, form=form)
+    departments = Department.query.order_by(Department.name).all()
+    positions = Position.query.order_by(Position.title).all()
+    return render_template('admin/edit_user.html', user=None, form=form, departments=departments, positions=positions)
 
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET', 'POST'])
@@ -208,7 +208,7 @@ def edit_user(user_id):
         full_name = request.form.get('full_name')
         role = request.form.get('role')
         department_id = request.form.get('department')
-        position = request.form.get('position')
+        position_id = request.form.get('position')
         password = request.form.get('password')
         
         # Check if email already exists
@@ -220,8 +220,8 @@ def edit_user(user_id):
         user.email = email
         user.full_name = full_name
         user.role = role
-        user.department = department_id
-        user.position = position
+        user.department_id = department_id if department_id else None
+        user.position_id = position_id if position_id else None
         
         if password:
             user.set_password(password)
@@ -231,7 +231,9 @@ def edit_user(user_id):
         flash('User has been updated successfully.', 'success')
         return redirect(url_for('admin.users'))
     
-    return render_template('admin/edit_user.html', user=user, form=form)
+    departments = Department.query.order_by(Department.name).all()
+    positions = Position.query.order_by(Position.title).all()
+    return render_template('admin/edit_user.html', user=user, form=form, departments=departments, positions=positions)
 
 
 @admin_bp.route('/users/delete/<int:user_id>', methods=['POST'])
@@ -445,9 +447,175 @@ def export_attendance():
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename={filename}'}
     )
+@admin_bp.route('/departments')
+@login_required
+@admin_required
+def departments():
+    form = FlaskForm()
+    departments = Department.query.order_by(Department.name).all()
+    return render_template('admin/departments.html', departments=departments, form=form)
+
+
+@admin_bp.route('/departments/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_department():
+    form = FlaskForm()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        name = request.form.get('name')
+        
+        # Validate name
+        if Department.query.filter_by(name=name).first():
+            flash('Department name already exists.', 'danger')
+            return redirect(url_for('admin.add_department'))
+        
+        # Create new department
+        new_department = Department(name=name)
+        db.session.add(new_department)
+        db.session.commit()
+        
+        flash('Department has been created successfully.', 'success')
+        return redirect(url_for('admin.departments'))
+    
+    return render_template('admin/edit_department.html', department=None, form=form)
+
+
+@admin_bp.route('/departments/edit/<int:department_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_department(department_id):
+    form = FlaskForm()
+    department = Department.query.get_or_404(department_id)
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        name = request.form.get('name')
+        
+        # Check if name is taken by another department
+        existing = Department.query.filter_by(name=name).first()
+        if existing and existing.id != department_id:
+            flash('Department name already exists.', 'danger')
+            return redirect(url_for('admin.edit_department', department_id=department_id))
+        
+        department.name = name
+        db.session.commit()
+        
+        flash('Department has been updated successfully.', 'success')
+        return redirect(url_for('admin.departments'))
+    
+    return render_template('admin/edit_department.html', department=department, form=form)
+
+
+@admin_bp.route('/departments/delete/<int:department_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_department(department_id):
+    form = FlaskForm()
+    if not form.validate_on_submit():
+        flash('CSRF token validation failed.', 'danger')
+        return redirect(url_for('admin.departments'))
+    
+    department = Department.query.get_or_404(department_id)
+    
+    # Remove department from users
+    User.query.filter_by(department_id=department_id).update({'department_id': None})
+    
+    db.session.delete(department)
+    db.session.commit()
+    
+    flash('Department has been deleted successfully.', 'success')
+    return redirect(url_for('admin.departments'))
+
+
+@admin_bp.route('/positions')
+@login_required
+@admin_required
+def positions():
+    form = FlaskForm()
+    positions = Position.query.order_by(Position.title).all()
+    return render_template('admin/positions.html', positions=positions, form=form)
+
+
+@admin_bp.route('/positions/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_position():
+    form = FlaskForm()
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        title = request.form.get('title')
+        
+        # Validate title
+        if Position.query.filter_by(title=title).first():
+            flash('Position title already exists.', 'danger')
+            return redirect(url_for('admin.add_position'))
+        
+        # Create new position
+        new_position = Position(title=title)
+        db.session.add(new_position)
+        db.session.commit()
+        
+        flash('Position has been created successfully.', 'success')
+        return redirect(url_for('admin.positions'))
+    
+    return render_template('admin/edit_position.html', position=None, form=form)
+
+
+@admin_bp.route('/positions/edit/<int:position_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_position(position_id):
+    form = FlaskForm()
+    position = Position.query.get_or_404(position_id)
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        title = request.form.get('title')
+        
+        # Check if title is taken by another position
+        existing = Position.query.filter_by(title=title).first()
+        if existing and existing.id != position_id:
+            flash('Position title already exists.', 'danger')
+            return redirect(url_for('admin.edit_position', position_id=position_id))
+        
+        position.title = title
+        db.session.commit()
+        
+        flash('Position has been updated successfully.', 'success')
+        return redirect(url_for('admin.positions'))
+    
+    return render_template('admin/edit_position.html', position=position, form=form)
+
+
+@admin_bp.route('/positions/delete/<int:position_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_position(position_id):
+    form = FlaskForm()
+    if not form.validate_on_submit():
+        flash('CSRF token validation failed.', 'danger')
+        return redirect(url_for('admin.positions'))
+    
+    position = Position.query.get_or_404(position_id)
+    
+    # Remove position from users
+    User.query.filter_by(position_id=position_id).update({'position_id': None})
+    
+    db.session.delete(position)
+    db.session.commit()
+    
+    flash('Position has been deleted successfully.', 'success')
+    return redirect(url_for('admin.positions'))
+
+
 @admin_bp.route('/settings')
 @login_required
 @admin_required
 def settings():
     form = FlaskForm()
-    return render_template('admin/settings.html', form=form)
+    
+    # Get data for settings page
+    departments = Department.query.all()
+    positions = Position.query.all()
+    total_users = User.query.filter_by(role='employee').count()
+    
+    return render_template('admin/settings.html', form=form, departments=departments, positions=positions, total_users=total_users)

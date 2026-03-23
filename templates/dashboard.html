@@ -19,10 +19,10 @@ endblock %} {% block content %}
         <i class="fas fa-user-circle fa-4x mb-3 text-primary"></i>
         <h5 class="card-title">{{ current_user.full_name }}</h5>
         <p class="card-text">
-          {{ current_user.department or 'Department not set' }}
+          {{ current_user.department.name if current_user.department else 'Department not set' }}
         </p>
         <p class="card-text text-muted">
-          {{ current_user.position or 'Position not set' }}
+          {{ current_user.position_rel.title if current_user.position_rel else 'Position not set' }}
         </p>
       </div>
     </div>

@@ -59,10 +59,10 @@ endblock %} {% block content %}
   <div class="input-group">
     <span class="input-group-text"><i class="fas fa-building"></i></span>
     <select class="form-control" id="department" name="department" required>
-      <!-- <option value="">Select Department</option> -->
-      <option value="Full Stack Developer">Full Stack Developer</option>
-      <option value="Frontend Developer">Frontend Developer</option>
-      <option value="Backend Developer">Backend Developer</option>
+      <option value="">Select Department</option>
+      {% for dept in departments %}
+      <option value="{{ dept.id }}">{{ dept.name }}</option>
+      {% endfor %}
     </select>
   </div>
 </div>

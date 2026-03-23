@@ -56,34 +56,30 @@
                         </div>
                     </div>
                     
-                    <!-- <div class="mb-3">
-                        <label for="department" class="form-label">Department</label>
-                        <input type="text" class="form-control" id="department" name="department" 
-                            {% if user and user.department %}value="{{ user.department }}"{% endif %}>
-                    </div> -->
                     <div class="mb-3">
     <label for="department" class="form-label">Department</label>
     <select class="form-select" id="department" name="department">
-        <!-- <option value="">Select Department</option> -->
-        <option value="full_stack_developer"
-            {% if user and user.department == 'full_stack_developer' %}selected{% endif %}>
-            Full Stack Developer
+        <option value="">Select Department</option>
+        {% for dept in departments %}
+        <option value="{{ dept.id }}"
+            {% if user and user.department_id == dept.id %}selected{% endif %}>
+            {{ dept.name }}
         </option>
-        <option value="frontend_developer"
-            {% if user and user.department == 'frontend_developer' %}selected{% endif %}>
-            Frontend Developer
-        </option>
-         <option value="backend_developer"
-            {% if user and user.department == 'backend_developer' %}selected{% endif %}>
-            Backend Developer
-        </option>
+        {% endfor %}
     </select>
 </div>
                     
                     <div class="mb-3">
                         <label for="position" class="form-label">Position</label>
-                        <input type="text" class="form-control" id="position" name="position" 
-                            {% if user and user.position %}value="{{ user.position }}"{% endif %}>
+                        <select class="form-select" id="position" name="position">
+                            <option value="">Select Position</option>
+                            {% for pos in positions %}
+                            <option value="{{ pos.id }}"
+                                {% if user and user.position_id == pos.id %}selected{% endif %}>
+                                {{ pos.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
                     
                     <div class="mb-3">

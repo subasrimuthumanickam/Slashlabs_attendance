@@ -189,8 +189,8 @@ def get_profile(current_user):
         'email': current_user.email,
         'full_name': current_user.full_name,
         'role': current_user.role,
-        'department': current_user.department,
-        'position': current_user.position
+        'department': current_user.department.name if current_user.department else None,
+        'position': current_user.position_rel.title if current_user.position_rel else None
     })
 
 

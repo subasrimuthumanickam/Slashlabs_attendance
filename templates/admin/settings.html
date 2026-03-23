@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-cog me-2"></i>System Settings</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+                            <i class="fas fa-cogs me-1"></i>General
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="false">
+                            <i class="fas fa-users me-1"></i>Users
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab" aria-controls="departments" aria-selected="false">
+                            <i class="fas fa-building me-1"></i>Departments
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="positions-tab" data-bs-toggle="tab" data-bs-target="#positions" type="button" role="tab" aria-controls="positions" aria-selected="false">
+                            <i class="fas fa-briefcase me-1"></i>Positions
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button" role="tab" aria-controls="attendance" aria-selected="false">
+                            <i class="fas fa-clipboard-check me-1"></i>Attendance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">
+                            <i class="fas fa-chart-bar me-1"></i>Reports
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="settingsTabContent">
+                    <!-- General Settings Tab -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <h5 class="card-title">General Settings</h5>
+                        <p class="card-text">Configure general system settings here.</p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            General settings configuration coming soon.
+                        </div>
+                    </div>
+
+                    <!-- Users Tab -->
+                    <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+                        <h5 class="card-title">User Management</h5>
+                        <p class="card-text">Manage system users and their permissions.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
+                                <i class="fas fa-users me-1"></i>Manage Users
+                            </a>
+                            <a href="{{ url_for('admin.add_user') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-1"></i>Add New User
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Departments Tab -->
+                    <div class="tab-pane fade" id="departments" role="tabpanel" aria-labelledby="departments-tab">
+                        <h5 class="card-title">Department Management</h5>
+                        <p class="card-text">Manage organizational departments and structure.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <a href="{{ url_for('admin.departments') }}" class="btn btn-success">
+                                <i class="fas fa-building me-1"></i>Manage Departments
+                            </a>
+                            <a href="{{ url_for('admin.add_department') }}" class="btn btn-outline-success">
+                                <i class="fas fa-plus me-1"></i>Add New Department
+                            </a>
+                        </div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-info-circle text-info me-1"></i>Department Stats</h6>
+                                            <p class="card-text">Total Departments: <strong>{{ departments|length if departments else 0 }}</strong></p>
+                                            <p class="card-text">Active Users: <strong>{{ total_users }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Positions Tab -->
+                    <div class="tab-pane fade" id="positions" role="tabpanel" aria-labelledby="positions-tab">
+                        <h5 class="card-title">Position Management</h5>
+                        <p class="card-text">Manage organizational positions and job titles.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <a href="{{ url_for('admin.positions') }}" class="btn btn-warning">
+                                <i class="fas fa-briefcase me-1"></i>Manage Positions
+                            </a>
+                            <a href="{{ url_for('admin.add_position') }}" class="btn btn-outline-warning">
+                                <i class="fas fa-plus me-1"></i>Add New Position
+                            </a>
+                        </div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-info-circle text-warning me-1"></i>Position Stats</h6>
+                                            <p class="card-text">Total Positions: <strong>{{ positions|length if positions else 0 }}</strong></p>
+                                            <p class="card-text">Active Users: <strong>{{ total_users }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Tab -->
+                    <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab">
+                        <h5 class="card-title">Attendance Settings</h5>
+                        <p class="card-text">Configure attendance tracking and policies.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <a href="{{ url_for('admin.attendance') }}" class="btn btn-warning">
+                                <i class="fas fa-clipboard-check me-1"></i>View Attendance
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Reports Tab -->
+                    <div class="tab-pane fade" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+                        <h5 class="card-title">Reports & Analytics</h5>
+                        <p class="card-text">Generate and view system reports and analytics.</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <a href="{{ url_for('admin.reports') }}" class="btn btn-info">
+                                <i class="fas fa-chart-bar me-1"></i>View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize Bootstrap tabs
+document.addEventListener('DOMContentLoaded', function() {
+    var triggerTabList = [].slice.call(document.querySelectorAll('#settingsTabs button'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+});
+</script>
+{% endblock %}

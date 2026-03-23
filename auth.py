@@ -87,7 +87,7 @@ def register():
             username=username, 
             email=email, 
             full_name=full_name,
-            department=department,
+            department_id=department if department else None,
             role='employee'
         )
         new_user.set_password(password)
@@ -98,7 +98,8 @@ def register():
         flash('Registration successful! You can now login.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('register.html', form=form)
+    departments = Department.query.order_by(Department.name).all()
+    return render_template('register.html', form=form, departments=departments)
 
 
 @auth_bp.route('/dashboard')
