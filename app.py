@@ -38,9 +38,6 @@ app.config.from_object(config[env])
 # Create upload folder
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# Initialize the database
-db.init_app(app)
-
 # Initialize CSRF protection
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -57,10 +54,25 @@ login_manager.login_message_category = 'info'
 # Initialize Bootstrap
 bootstrap = Bootstrap(app)
 
-# Import models and create tables
-with app.app_context():
-    from models import User, Attendance
-    db.create_all()
+def init_app_database():
+    db.init_app(app)
+    with app.app_context():
+        from models import User, Attendance
+        app.logger.info("Using database URI=%s", app.config.get('SQLALCHEMY_DATABASE_URI'))
+        try:
+            app.logger.info("db.engine before create_all=%s", getattr(db, 'engine', None))
+            db.create_all()
+        except Exception as e:
+            app.logger.error("DB create_all failed for %s: %s", app.config.get('SQLALCHEMY_DATABASE_URI'), e)
+            if "sqlite" not in (app.config.get('SQLALCHEMY_DATABASE_URI') or ""):
+                fallback_uri = 'sqlite:///attendance.db'
+                app.logger.warning("Falling back to local %s", fallback_uri)
+                app.config['SQLALCHEMY_DATABASE_URI'] = fallback_uri
+                db.session.remove()
+                db.engine.dispose()
+                db.create_all()
+            else:
+                raise
 
 # Import and register blueprints
 from auth import auth_bp
