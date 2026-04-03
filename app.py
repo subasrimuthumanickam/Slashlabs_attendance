@@ -64,15 +64,8 @@ def init_app_database():
             db.create_all()
         except Exception as e:
             app.logger.error("DB create_all failed for %s: %s", app.config.get('SQLALCHEMY_DATABASE_URI'), e)
-            if "sqlite" not in (app.config.get('SQLALCHEMY_DATABASE_URI') or ""):
-                fallback_uri = 'sqlite:///attendance.db'
-                app.logger.warning("Falling back to local %s", fallback_uri)
-                app.config['SQLALCHEMY_DATABASE_URI'] = fallback_uri
-                db.session.remove()
-                db.engine.dispose()
-                db.create_all()
-            else:
-                raise
+            # Do not fallback to sqlite automatically; require configured database URL.
+            raise
 
 # Import and register blueprints
 from auth import auth_bp

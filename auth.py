@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 
 from app import db
-from models import User
+from models import User,Department
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -45,7 +45,7 @@ def login():
         if user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
         return redirect(url_for('auth.dashboard'))
-    
+    print("error", form.errors)
     return render_template('login.html', form=form)
 
 
